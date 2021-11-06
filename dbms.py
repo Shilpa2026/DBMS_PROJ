@@ -339,7 +339,7 @@ def disp_menu():
 	print("3.Display the Details of not delivered orders")
 	print("4.Display list of depleted Products ")
 	print("5.Display Shipping  Details")
-	print("6.Display Products that are not shipped")
+	print("6.Display Orders that are not shipped")
 	print("7.Dispaly details of payment defaulters")
 	
 
@@ -540,6 +540,93 @@ def c_up_menu():
 	print("2.Update Customer Email ")
 	print("3.Update Payment Mode ")	
 
+
+def c_disp_menu():
+	print('\t\t\t\t\tMENU')
+	print("1.Dispaly Customer information")
+	print("2.Display All orders by a customer id ")
+	print("3.Display Order Details using order id")
+	print("4.Display payment details of an order ")
+	print("5.Filter all Products using brand")
+	print("6.Filter all  Products using category")
+	print("7.Filter all Products using Price Range")
+
+def c_disp_custinfo():
+	cid = input("Customer ID: ")
+	sql = "select cid,cname,cphone,cmail,building_no,street_no,street_name, city,district,state,country,pin  FROM customer inner join address on customer.cid = address.id where cid = %s"
+
+	val = (cid,)
+	co.execute(sql,val)
+	x = co.fetchall()
+	head = ("CID","CUSTOMER-NAME","CUSTOMER-PHONE","CUSTOMER EMAIL","BUILD.NO","ST.NO","ST.NAME","CITY","DIST","STATE","COUNTRY","PIN")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+		
+def c_disp_pd():
+	oid = input("Order id : ")
+	sql = "select * from payment where oid = %s"
+	val = (oid,)
+	co.execute(sql,val)
+	x = co.fetchall()
+	head = ("ID","PAYMENT_DATE","CUSTOMER-ID","ORDER-ID","TOTAL-AMOUNT","PAYMENT-MODE")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+		
+def fil_brand_prod():
+	mname = input("Brand Name : ")
+	sql = "select pid,pname,size,unit_price, tot_qty,catid, manufacturer.mfid, manufacturer.mname from products inner join manufacturer on products.mfid = manufacturer.mfid where manufacturer.mname = %s"
+	val = (mname,)	
+	co.execute(sql,val)
+	x = co.fetchall()
+	head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","CATEGORY-ID","MANUF.ID","MANUFACTURER-NAME")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()	
+		
+def fil_cat_prod():	
+	catname = input("Category: ")
+	sql = "select pid,pname,size,unit_price, tot_qty, category.catid, category.catname from products inner join category on products.catid = category.catid where category.catname = %s"
+	val = (catname,)	
+	co.execute(sql,val)
+	x = co.fetchall()
+	head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","CATEGORY-ID","CATEGORY-NAME")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+
+def fil_price_prod():
+	maxp = input("Max Price Limit: ")
+	minp = input("Min Price Limit: ")
+	sql = "select * from products where unit_price between %s and %s"
+	val = (minp,maxp)
+	co.execute(sql,val)
+	x = co.fetchall()
+	head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","MANUF.ID","CATEGORY-ID")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
 def c_up_cp():
 	cid = input("Customer ID: ")
 	cname = input("Customer Name: ")
@@ -612,19 +699,19 @@ def cust_menu():
 				disp_menu()
 				m = input("Enter the option : ")
 				if(m == '1'):
-					disp_oid()
+					c_disp_custinfo()
 				elif (m == '2'):
 					disp_o_cust()
 				elif (m == '3'):
-					disp_not_deliv()
+					disp_oid()
 				elif (m == '4'):
-					disp_depl()
+					c_disp_pd()
 				elif (m == '5'):
-					disp_ship()
+					fil_brand_prod()
 				elif (m == '6'):
-					disp_notshipped()
+					fil_cat_prod()
 				elif (m == '7'):
-					disp_pay_def()
+					fil_price_prod()
 				else :
 					print("Invalid Option")
 				opt = input ("Press 'y' to continue and 'n' to go back to Admin Menu:")
