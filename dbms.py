@@ -274,12 +274,11 @@ def ad_menu():
 	print('\t\t\t\t\tMENU')
 	print("1.Add Manufacturer details ")
 	print("2.Add Delivery Partner Details")
-	print("3.Add Categoru=y Details ")
+	print("3.Add Category Details ")
 	print("4.Add Customer Details ")
 	print("5.Add Product Details ")
-	print("6.Add Order Details ")
-	print("7.Add Payment Details ")
-	print("8.Add Shipping Details ")	
+	print("6.Add Payment Details ")
+	print("7.Add Shipping Details ")	
 
 
 def Add_man():
@@ -347,7 +346,7 @@ def Add_prod():
 	conn.commit()
 def Add_ord():
 
-		
+	showord()
 	oid = input("Enter the order id : ")
 	odate = input("Enter the dat in  yyyy mm dd format : ")
 	cid = input("Enter the customer id : ")
@@ -677,10 +676,8 @@ def admin_menu ():
 				elif (m == '5'):
 					Add_prod()
 				elif (m == '6'):
-					Add_ord()
-				elif (m == '7'):
 					Add_pay()
-				elif (m == '8'):
+				elif (m == '7'):
 					Add_ship()
 				else :
 					print("Invalid Option")
