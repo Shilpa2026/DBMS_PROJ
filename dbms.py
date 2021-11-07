@@ -444,6 +444,12 @@ def disp_notshipped():
 		print()
 		
 
+def del_menu():
+	print('\t\t\t\t\tMENU')
+	print("1.Delete Brand")
+	print("2.Delete Product")
+	print("3.Delete Delivery Partner")
+	print("4.Delete depleted Products ")
 
 
 def admin_menu ():
@@ -519,12 +525,34 @@ def admin_menu ():
 				else :
 					print("Invalid Option")
 				opt = input ("Press 'y' to continue and 'n' to go back to Admin Menu:")
+		elif (n == '4'): 
+			opt = 'y'
+			while (opt == 'y' or opt == 'Y'):
+				del_menu()
+				m = input("Enter the option : ")
+				if(m == '1'):
+					disp_oid()
+				elif (m == '2'):
+					disp_o_cust()
+				elif (m == '3'):
+					disp_not_deliv()
+				elif (m == '4'):
+					disp_depl()
+				elif (m == '5'):
+					disp_ship()
+				elif (m == '6'):
+					disp_notshipped()
+				elif (m == '7'):
+					disp_pay_def()
+				else :
+					print("Invalid Option")
+				opt = input ("Press 'y' to continue and 'n' to go back to Admin Menu:")
+		
 		else :	print("Invalid Option !")
 		
 		a = input("Press 'y' to continue and 'n' to go back to Admin page:")
 		if (a == 'n' or a == 'N'):
-			exit(0)
-			
+			return
 			
 			
 def c_ad_menu():
@@ -550,6 +578,34 @@ def c_disp_menu():
 	print("5.Filter all Products using brand")
 	print("6.Filter all  Products using category")
 	print("7.Filter all Products using Price Range")
+
+
+def c_del_menu():
+	print('\t\t\t\t\tMENU')
+	print("1.Delete Customer")
+	print("2.Delete Order")
+
+def c_del_cust():
+	cid = input("Customer ID: ")
+	sql = "delete from customer where cid = %s"
+	val = (cid,)
+	co.execute(sql,val)
+	conn.commit()
+	
+	
+def c_del_ord():
+	oid = input("Order id : ")
+	sql = "SELECT distinct(oid), IF(oid not in (select oid from shipping), 1, 0) FROM orders where oid = %s"
+	val = (oid,)
+	co.execute(sql,val)
+	s = str(co.fetchone()[1])
+	if (s == '0'):
+		print("Not Possible to Delete")
+	else : 
+		sql = "delete from orders where oid = %s"
+		val = (oid,)
+		co.execute(sql,val)
+		conn.commit()
 
 def c_disp_custinfo():
 	cid = input("Customer ID: ")
@@ -715,11 +771,24 @@ def cust_menu():
 				else :
 					print("Invalid Option")
 				opt = input ("Press 'y' to continue and 'n' to go back to Admin Menu:")
+		
+		elif (n == '4'): 
+			opt = 'y'
+			while (opt == 'y' or opt == 'Y'):
+				c_del_menu()
+				m = input("Enter the option : ")
+				if(m == '1'):
+					c_del_cust()
+				elif (m == '2'):
+					c_del_ord()
+				else :
+					print("Invalid Option")
+				opt = input ("Press 'y' to continue and 'n' to go back to Admin Menu:")
 		else :	print("Invalid Option !")
 		
 		a = input("Press 'y' to continue and 'n' to go back to Admin page:")
 		if (a == 'n' or a == 'N'):
-			exit(0)
+			return
 
 def menu():
 	print('\t\t\t\t\tLOGIN OPTIONS:')
@@ -737,14 +806,14 @@ def main():
         if (o == '1'):
         	admin_log()
         	admin_menu()
-        	a = input("Press 'y' to continue and 'n' to go back to Login:")
+        	a = input("Press 'y' to continue and 'n' to Exit:")
         elif(o  == '2'):
         	cust_log()
         	cust_menu()
-        	a = input("Press 'y' to continue and 'n' to go back Login:")
+        	a = input("Press 'y' to continue and 'n' to Exit:")
         elif (o == '3'):
         	new_user()
-        	a = input("Press 'y' to continue and 'n' to go back Login:")
+        	a = input("Press 'y' to continue and 'n' to Exit :")
         elif (o == '4'): exit(0)
         
         else : raise Exception("Invalid Option!")
