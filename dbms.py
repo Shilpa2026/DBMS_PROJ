@@ -1,6 +1,6 @@
 import mysql.connector
 import datetime
-
+from os import * 
 # Connecting from the server
 conn = mysql.connector.connect(user = 'Shilpa',passwd = "Shilpa@2026",database = 'testingdbms',host = 'localhost',auth_plugin='mysql_native_password')
 
@@ -167,7 +167,109 @@ def cust_log():
 		print("Successfull login!")
 	else : 
 		raise Exception("Wrong Password!")	
-			
+
+def showman():
+	sql = "select * from manufacturer;"
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("MANUFACTURER-ID","BRAND-NAME","CONTACT-NO.")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+def showdp():
+	sql = "select * from Delivery_partner;"
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("DID","DNAME")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+def showcat(): 
+	sql = "select * from category;"
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("CATEGORY-ID","CATEGORY-NAME")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+def showcust():
+
+	sql = "select cid,cname,cphone,cmail,building_no,street_no,street_name, city,district,state,country,pin  FROM customer inner join address on customer.cid = address.id;"
+	
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("CID","CUSTOMER-NAME","CUSTOMER-PHONE","CUSTOMER EMAIL","BUILD.NO","ST.NO","ST.NAME","CITY","DIST","STATE","COUNTRY","PIN")
+	for y in head :
+		print(str(y).ljust(15), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(15), end='')
+		print()
+		
+def showprod(): 
+	sql = "select * from products;"
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("PROD-ID","PROD-NAME","PROD-SIZE","USP","QUANTITY","MANUF-ID","CATEGORY-ID")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print() 
+def showord(): 
+	sql = "select * from orders;"
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+def showpay():
+	sql = "select * from payment;"
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("ID","PAY_DATE","CUSTOMER-ID","ORDER-ID","TOTAL-AMNT","MODE")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+
+
+def showship():
+	sql = "select * from shipping;"
+	co.execute(sql)
+	x = co.fetchall()
+	head = ("TRACK-ID","SHIP_DATE","DELIVERED DATE","DELIVERY_PARTNER-ID","ORDER-ID")
+	for y in head :
+		print(str(y).ljust(20), end='')
+	print()
+	for i in x:
+		for y in i:
+			print(str(y).ljust(20), end='')
+		print()
+		
 def ad_menu():
 	print('\t\t\t\t\tMENU')
 	print("1.Add Manufacturer details ")
@@ -258,8 +360,20 @@ def Add_ord():
 	val = (pid,size)
 	co.execute(sql,val)
 	unit_price = float(co.fetchone()[0])
-	sql = "insert into orders (oid,odate,cid,pid,pname,size,unit_price,p_qty) values (%s,%s,%s,%s,%s,%s,%s,%s)"
-	val = (oid,odate,cid,pid,pname,size,unit_price,p_qty)
+	tot = float(p_qty) * unit_price
+	if(tot >= 5000 and tot < 10000):
+		discount = 0.05
+	elif(tot >= 10000 and tot < 15000):
+		discount = 0.10
+	elif(tot >= 15000 and tot < 20000):
+		discount = 0.15
+	elif(tot >= 20000):
+		discount = 0.25
+	else: discount = 0.00
+	
+	  
+	sql = "insert into orders (oid,odate,cid,pid,pname,discount,size,unit_price,p_qty) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+	val = (oid,odate,cid,pid,pname,discount,size,unit_price,p_qty)
 	"""discount = 0
 	args = [oid,pid,size,p_qty]
 	co.callproc('calc_disc',args)"""
@@ -271,10 +385,11 @@ def Add_pay():
 	cid = input("Enter the customer id : ")
 	oid = input("Enter the order id : ")
 	mode = input("Enter the mode of payment : ") 
-	sql = "select sum(unit_price * p_qty) from orders where oid = %s;"
+	sql = "select sum(unit_price * p_qty - (unit_price * p_qty * discount)) from orders where oid = %s;"
 	val = (oid,)
 	co.execute(sql,val)
 	amt = float(co.fetchone()[0])
+	amt = round(amt,2)
 	sql = "insert into payment (pay_date,cid,oid,tot_amt,mode) values (%s,%s,%s,%s,%s)"
 	val = (pay_date,cid,oid,amt,mode)
 	co.execute(sql,val)
@@ -305,31 +420,50 @@ def up_menu():
 	print("3.Update Delivery Date ")
 	
 def up_man():
+	showman()
+	print('\n\n')
 	mfid = input("Manufacturer ID :")
 	mphone = input("New Phone Number : ")
-	sql = "update manufacturer set mphone = %s where mfid = %s"
-	val = (mfid,mphone)
-	co.execute(sql,val)
-	conn.commit()
-
+	try :
+		sql = "update manufacturer set mphone = %s where mfid = %s"
+		val = (mfid,mphone)
+		co.execute(sql,val)
+		conn.commit()
+		print("Successfully Updated")
+	except Exception as e: 
+		print(e) 
+		print("Unsuccessful !")
+				
 	
 def up_pq():
+	showprod()
 	pid = input("PRODUCT ID: ")
 	pname = input("PRODUCT NAME: ")
 	size = input("PRODUCT SIZE:")
 	pqty = input ("QTY ADDED: ")
 	sql = "update products set tot_qty = tot_qty + %s where pid = %s and pname = %s and size = %s"
 	val = (pqty,pid,pname,size)
-	co.execute(sql,val)
-	conn.commit()
+	try:
+		co.execute(sql,val)
+		conn.commit()
+		print("Successfully Updated")
+	except Exception as e: 
+		print(e) 
+		print("Unsuccessful !")
 def up_oddate():
+	showship()
 	trackid = input("TRACKING ID: ")
 	oid = input("ORDER ID : ")
 	delivdate = input("DELIVERY DATE:")
 	sql = "update shipping set delivdate = %s where trackid = %s and oid = %s"
 	val = (delivdate,trackid,oid)
-	co.execute(sql,val)
-	conn.commit()
+	try:
+		co.execute(sql,val)
+		conn.commit()
+		print("Successfully Updated")
+	except Exception as e: 
+		print(e) 
+		print("Unsuccessful !")
 	
 
 def disp_menu():
@@ -346,103 +480,125 @@ def disp_menu():
 
 def disp_not_deliv():
 	sql = "select * from orders where oid in (select oid from shipping where delivdate is null)"
-	co.execute(sql)
-	x = co.fetchall()
-	head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try: 
+		co.execute(sql)
+		x = co.fetchall()
+		head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+		
 		
 def disp_ship():
 	trackid = input("Enter the tracking id : ")
 	sql = "select * from shipping where trackid = %s"
 	val = (trackid,)
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("TRACKID","SHIP-DATE","DELIVERY-DATE","DELIVERY_PARTNER-ID","ORDER-ID")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("TRACKID","SHIP-DATE","DELIVERY-DATE","DELIVERY_PARTNER-ID","ORDER-ID")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-	
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+		
 
 def disp_o_cust():
 	cid = input("Enter the Customer id : ")
 	sql = "select * from orders where cid = %s"
 	val = (cid,)
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+		
 def disp_oid():
 	oid = input("Enter the Order id : ")
 	sql = "select * from orders where oid = %s"
 	val = (oid,)
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+		
 def disp_depl():
 	sql = "select products.pid,products.pname,products.size,products.unit_price,products.mfid,manufacturer.mname,products.catid from products inner join manufacturer on products.mfid = manufacturer.mfid where tot_qty = 0;"
-	co.execute(sql)
-	x = co.fetchall()
-	head = ("PRODUCT-ID","NAME","SIZE","USP","MANUF.ID","MANUFACTURER-NAME","CATEGORY-ID")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql)
+		x = co.fetchall()
+		head = ("PRODUCT-ID","NAME","SIZE","USP","MANUF.ID","MANUFACTURER-NAME","CATEGORY-ID")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+		
 
 def disp_pay_def():
 	sql = "select distinct(orders.cid),customer.cname , oid from orders inner join customer on orders.cid = customer.cid  where orders.cid not in (select cid from payment);"
-	co.execute(sql)
-	x = co.fetchall()
-	head = ("CUSTOMER-ID","NAME","ORDER-ID")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql)
+		x = co.fetchall()
+		head = ("CUSTOMER-ID","NAME","ORDER-ID")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+		
 def disp_notshipped():
 	sql = "select * from orders where oid not in (select oid from shipping);"
-	co.execute(sql)
-	x = co.fetchall()
-	head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql)
+		x = co.fetchall()
+		head = ("OID","ODATE","CID","PID","PNAME","DISCOUNT","SIZE","UNIT_PRICE","QUANTITY")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-		
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+			
 
 def del_menu():
 	print('\t\t\t\t\tMENU')
@@ -451,7 +607,46 @@ def del_menu():
 	print("3.Delete Delivery Partner")
 	print("4.Delete depleted Products ")
 
-
+def del_brand():
+	showman()
+	mfid = input("Manufacturer ID: ")
+	sql = ("delete from manufacturer where mfid = %s")
+	val = (mfid,)
+	try:
+		co.execute(sql,val)
+		conn.commit()
+	except Exception as e: 
+		print(e) 
+	
+def del_prod():
+	showprod()
+	pid = input("Product ID: ")
+	sql = ("delete from products where pid = %s")
+	val = (pid,)
+	try:
+		co.execute(sql,val)
+		conn.commit()
+	except Exception as e: 
+		print(e) 
+def del_dp():
+	showdp()
+	did = input("Delivery Partner ID: ")
+	sql = ("delete from Delivery_partner where did = %s")
+	val = (did,)
+	try:
+		co.execute(sql,val)
+		conn.commit()
+	except Exception as e: 
+		print(e) 
+def del_depp():
+	disp_depl()
+	sql = "delete from products where tot_qty = 0;"
+	try:
+		co.execute(sql)
+		conn.commit()
+	except Exception as e: 
+		print(e) 
+		
 def admin_menu ():
 	a = 'y'
 	while (a == 'y' or a == 'Y'):
@@ -467,8 +662,10 @@ def admin_menu ():
 		if (n == '1') :
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
+				system('clear')
 				ad_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if(m == '1'):
 					Add_man()
 				elif (m == '2'):
@@ -491,8 +688,10 @@ def admin_menu ():
 		elif (n == '2'):
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
+				system('clear')
 				up_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if (m == '1'):
 					up_man()
 				elif (m == '2'):
@@ -506,8 +705,10 @@ def admin_menu ():
 		elif (n == '3'): 
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
+				system('clear')
 				disp_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if(m == '1'):
 					disp_oid()
 				elif (m == '2'):
@@ -528,22 +729,18 @@ def admin_menu ():
 		elif (n == '4'): 
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
+				system('clear')
 				del_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if(m == '1'):
-					disp_oid()
+					del_brand()
 				elif (m == '2'):
-					disp_o_cust()
+					del_prod()
 				elif (m == '3'):
-					disp_not_deliv()
+					del_dp()
 				elif (m == '4'):
-					disp_depl()
-				elif (m == '5'):
-					disp_ship()
-				elif (m == '6'):
-					disp_notshipped()
-				elif (m == '7'):
-					disp_pay_def()
+					del_depp()
 				else :
 					print("Invalid Option")
 				opt = input ("Press 'y' to continue and 'n' to go back to Admin Menu:")
@@ -586,14 +783,18 @@ def c_del_menu():
 	print("2.Delete Order")
 
 def c_del_cust():
+	showcust()
 	cid = input("Customer ID: ")
 	sql = "delete from customer where cid = %s"
 	val = (cid,)
-	co.execute(sql,val)
-	conn.commit()
-	
+	try:
+		co.execute(sql,val)
+		conn.commit()
+	except Exception as e: 
+		print(e) 
 	
 def c_del_ord():
+	showord()
 	oid = input("Order id : ")
 	sql = "SELECT distinct(oid), IF(oid not in (select oid from shipping), 1, 0) FROM orders where oid = %s"
 	val = (oid,)
@@ -604,108 +805,136 @@ def c_del_ord():
 	else : 
 		sql = "delete from orders where oid = %s"
 		val = (oid,)
-		co.execute(sql,val)
-		conn.commit()
-
+		try:
+			co.execute(sql,val)
+			conn.commit()
+		except Exception as e: 
+			print(e) 
 def c_disp_custinfo():
+	
 	cid = input("Customer ID: ")
 	sql = "select cid,cname,cphone,cmail,building_no,street_no,street_name, city,district,state,country,pin  FROM customer inner join address on customer.cid = address.id where cid = %s"
-
 	val = (cid,)
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("CID","CUSTOMER-NAME","CUSTOMER-PHONE","CUSTOMER EMAIL","BUILD.NO","ST.NO","ST.NAME","CITY","DIST","STATE","COUNTRY","PIN")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
-			print(str(y).ljust(20), end='')
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("CID","CUSTOMER-NAME","CUSTOMER-PHONE","CUSTOMER EMAIL","BUILD.NO","ST.NO","ST.NAME","CITY","DIST","STATE","COUNTRY","PIN")
+		for y in head :
+			print(str(y).ljust(15), end='')
 		print()
-		
+		for i in x:
+			for y in i:
+				print(str(y).ljust(15), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+			
 def c_disp_pd():
 	oid = input("Order id : ")
 	sql = "select * from payment where oid = %s"
 	val = (oid,)
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("ID","PAYMENT_DATE","CUSTOMER-ID","ORDER-ID","TOTAL-AMOUNT","PAYMENT-MODE")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("ID","PAYMENT_DATE","CUSTOMER-ID","ORDER-ID","TOTAL-AMOUNT","PAYMENT-MODE")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-		
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 		
 def fil_brand_prod():
 	mname = input("Brand Name : ")
 	sql = "select pid,pname,size,unit_price, tot_qty,catid, manufacturer.mfid, manufacturer.mname from products inner join manufacturer on products.mfid = manufacturer.mfid where manufacturer.mname = %s"
 	val = (mname,)	
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","CATEGORY-ID","MANUF.ID","MANUFACTURER-NAME")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","CATEGORY-ID","MANUF.ID","MANUFACTURER-NAME")
+		for y in head :
 			print(str(y).ljust(20), end='')
-		print()	
-		
+		print()
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()	
+	except Exception as e: 
+		print(e) 
+			
 def fil_cat_prod():	
 	catname = input("Category: ")
 	sql = "select pid,pname,size,unit_price, tot_qty, category.catid, category.catname from products inner join category on products.catid = category.catid where category.catname = %s"
 	val = (catname,)	
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","CATEGORY-ID","CATEGORY-NAME")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","CATEGORY-ID","CATEGORY-NAME")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
-
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
+		
 def fil_price_prod():
 	maxp = input("Max Price Limit: ")
 	minp = input("Min Price Limit: ")
 	sql = "select * from products where unit_price between %s and %s"
 	val = (minp,maxp)
-	co.execute(sql,val)
-	x = co.fetchall()
-	head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","MANUF.ID","CATEGORY-ID")
-	for y in head :
-		print(str(y).ljust(20), end='')
-	print()
-	for i in x:
-		for y in i:
+	try:
+		co.execute(sql,val)
+		x = co.fetchall()
+		head = ("PRODUCT-ID","NAME","SIZE","USP","QUANTITY","MANUF.ID","CATEGORY-ID")
+		for y in head :
 			print(str(y).ljust(20), end='')
 		print()
+		for i in x:
+			for y in i:
+				print(str(y).ljust(20), end='')
+			print()
+	except Exception as e: 
+		print(e) 
 def c_up_cp():
+	showcust()
 	cid = input("Customer ID: ")
 	cname = input("Customer Name: ")
 	cphone = input("Enter New Phone Number: ")
 	sql = "update customer set cphone = %s where cid = %s and cname = %s"
 	val = (cphone,cid,cname )
-	co.execute(sql,val)
-	conn.commit()	
+	try:
+		co.execute(sql,val)
+		conn.commit()
+	except Exception as e: 
+		print(e) 	
 def c_up_email():
+	showcust()
 	cid = input("Customer ID: ")
 	cemail = input("Customer email: ")
 	sql = "update customer set cmail = %s where cid = %s"
 	val = (cemail,cid)
-	co.execute(sql,val)
-	conn.commit()
+	try:
+		co.execute(sql,val)
+		conn.commit()
+	except Exception as e: 
+		print(e) 
 
 def c_up_paymode():
+	showpay()
 	iid =  input("Payment id / Customer id: ")
 	mode = input("Mode: ")
 	sql = "update payment set mode = %s where id = %s or cid = %s"
 	val = (mode,iid,iid)
-	co.execute(sql,val)
-	conn.commit()
+	try:
+		co.execute(sql,val)
+		conn.commit()
+	except Exception as e: 
+		print(e) 
 
 				
 def cust_menu():
@@ -721,10 +950,13 @@ def cust_menu():
 		n = input("Enter the option : ")
 		print(n)
 		if (n == '1') :
+			
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
+				system('clear')
 				c_ad_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if(m == '1'):
 					Add_cust()
 				elif (m == '2'):
@@ -735,10 +967,13 @@ def cust_menu():
 					print("Invalid Option")
 				opt = input ("Press 'y' to continue and 'n' to go back to Admin Menu:")
 		elif (n == '2'):
+			
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
+				system('clear')
 				c_up_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if (m == '1'):
 					c_up_cp()
 				elif (m == '2'):
@@ -752,8 +987,10 @@ def cust_menu():
 		elif (n == '3'): 
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
-				disp_menu()
+				system('clear')
+				c_disp_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if(m == '1'):
 					c_disp_custinfo()
 				elif (m == '2'):
@@ -775,8 +1012,10 @@ def cust_menu():
 		elif (n == '4'): 
 			opt = 'y'
 			while (opt == 'y' or opt == 'Y'):
+				system('clear')
 				c_del_menu()
 				m = input("Enter the option : ")
+				system('clear')
 				if(m == '1'):
 					c_del_cust()
 				elif (m == '2'):
@@ -804,14 +1043,20 @@ def main():
         o = input("Enter the option : ")
         
         if (o == '1'):
+        	system('clear')
         	admin_log()
+        	system('clear')
+        	print("Successfully Logged in!")
         	admin_menu()
         	a = input("Press 'y' to continue and 'n' to Exit:")
         elif(o  == '2'):
+        	system('clear')
         	cust_log()
+        	system('clear')
         	cust_menu()
         	a = input("Press 'y' to continue and 'n' to Exit:")
         elif (o == '3'):
+        	system('clear')        
         	new_user()
         	a = input("Press 'y' to continue and 'n' to Exit :")
         elif (o == '4'): exit(0)
@@ -820,6 +1065,8 @@ def main():
         
     
     print()
+    
+
 if __name__ == "__main__":
     main()
 
